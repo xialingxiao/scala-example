@@ -11,25 +11,25 @@ import org.json4s.jackson.JsonMethods._
 import org.json4s.JsonDSL._
 
 case class User(id: Int, firstName : String, lastName: String, age:Int)
-
+case class ReturnStatus(response: String)
 case class UserRepository(userDictionary: HashMap[Int,User]){
     var allUsers = userDictionary retain {(key,value) => (key == value.id && value.id>0 && value.age>=0)}
     def returnAll(): List[User] = { 
         allUsers.values.toList
     }
-    def findUser(id: Int): User = { 
+    def findUser(id: Int): Option[User] = { 
         if (allUsers.keySet.exists(_ == id)){
-            allUsers(id)
+            Option(allUsers(id))
         } else {
-            User(0,"","",0)
+            Option(null)
         }
     }
-    def postUser(user: User): String = { 
+    def postUser(user: User): ReturnStatus = { 
         if (user.id > 0 && user.age >= 0) {
             allUsers += (user.id -> user)
-            "Success"
+            ReturnStatus("Success")
         } else {
-            "Failure"
+            ReturnStatus("Failure")
         }
         
     }
@@ -48,16 +48,25 @@ object Users {
             ("lastName" -> user.lastName) ~
             ("age" -> user.age)
         )
-        compact(render(userResultJson))
         if (user.id<=0) {""} else {compact(render(userResultJson))}
     }
-    var userRepository = UserRepository(HashMap(1->User(1,"Lingxiao","Xia",28)))
+    def returnStatusToJson(returnStatus:ReturnStatus):String = {
+        val returnStatusJson = (
+            ("response" -> returnStatus.response) 
+        )
+        compact(render(returnStatusJson))
+    }
+    var userRepository = UserRepository(HashMap(1->User(1,"Mickey","Mouse",83)))
     val service = HttpService {
     case GET -> Root / "Users" =>
-        Ok("["+userRepository.returnAll().map(x => userToJson(x)).mkString(",")+"]")
-    case GET -> Root / "Users" / id => 
-        Ok(userToJson(userRepository.findUser(Try(id.toInt).getOrElse(-1))))
+        Ok("["+userRepository.returnAll().map(x => userToJson(x)).mkString(",")+"]\n")
+    case GET -> Root / "Users" / id => {
+        userRepository.findUser(Try(id.toInt).getOrElse(-1)) match {
+            case Some(user) => Ok(userToJson(user)+"\n")
+            case None => Ok("")
+        }
+    }
     case req @ POST -> Root / "Users" =>
-        req.as[User] flatMap ( user => Ok(userRepository.postUser(user)))
+        req.as[User] flatMap ( user => Ok(returnStatusToJson(userRepository.postUser(user))+"\n"))
     }
 }

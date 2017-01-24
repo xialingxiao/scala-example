@@ -8,7 +8,7 @@ import org.http4s.server.{Server, ServerApp}
 object Main extends ServerApp {
   override def server(args: List[String]): Task[Server] = {
     BlazeBuilder
-      .bindHttp(8080, "localhost")
+      .bindHttp(9503, "localhost")
       .mountService(Users.service, "/")
       .start
   }
