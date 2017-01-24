@@ -3,21 +3,21 @@ This is a skeleton JSON + HTTP RestFul api service that serves only three endpoi
 
 1. Retrieve all users
 
-```
-GET /users 
-```
+    ```
+    GET /users 
+    ```
 
 2. Retrieve a user with a certain ID
 
-```
-GET /users/:id 
-```
+    ```
+    GET /users/:id 
+    ```
 
 3. Add a user
 
-```
-POST /users 
-```
+    ```
+    POST /users 
+    ```
 
 Example user:
 
