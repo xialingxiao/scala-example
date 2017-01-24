@@ -3,7 +3,7 @@ import scala.util.Random
 case class Baz(result:String){
     def getResult(): String = { 
         val decision = new Random().nextFloat()
-        if (decision>0.5){
+        if (decision>0.3){
             result
         } else {
             null
