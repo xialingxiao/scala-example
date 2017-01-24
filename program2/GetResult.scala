@@ -1,61 +1,54 @@
 import scala.util.Random
 
 case class Baz(result:String){
-    def getResult(): String = { 
+    def getResult(): Option[String] = { 
         val decision = new Random().nextFloat()
-        if (decision>0.5){
-            result
+        if (decision>0.3){
+            Option(result)
         } else {
-            null
+            Option(null)
         }
     }
 }
 
 case class Bar(baz:Baz){
-    def getBaz(): Baz = { 
+    def getBaz(): Option[Baz] = { 
         val decision = new Random().nextFloat()
         if (decision>0.1){
-            baz
+            Option(baz)
         } else {
-            null
+            Option(null)
         }
     }
 }
 
 case class Foo(bar:Bar){
-    def getSecond(): Bar = { 
+    def getSecond(): Option[Bar] = { 
         val decision = new Random().nextFloat()
         if (decision>0.1){
-            bar
+            Option(bar)
         } else {
-            null
+            Option(null)
         }
     }
 }
 
 object GetResult {
-    def getFoo(): Foo = {
+    def getFoo(): Option[Foo] = {
             val decision = new Random().nextFloat()
             if (decision>0.1){
-                Foo(Bar(Baz("Test result")))
+                Option(Foo(Bar(Baz("Test result"))))
             } else {
-                null
+                Option(null)
             }
             
         }
     def main(args:Array[String]):Unit = {
-        val foo = getFoo()
-        if (foo!= null){
-            val bar = foo.getSecond()
-            if (bar!=null){
-                val baz = bar.getBaz()
-                if(baz!=null){
-                    val result = baz.getResult()
-                    if(result!=null){
-                        println(result)
-                    }
-                }
-            }
-        }
+        for {
+          foo <- getFoo()
+          bar <- foo.getSecond()
+          baz <- bar.getBaz()
+          result <- baz.getResult()
+        } yield println(result)
     }
 }
